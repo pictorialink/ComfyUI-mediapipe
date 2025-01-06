@@ -7,31 +7,36 @@ mp_holistic = mp.solutions.holistic
 
 
 def save_json(results):
-    
-    
     landmarks_dict = {
         'pose_world_landmarks': [],
         'pose_landmarks': [],
         'left_hand_landmarks': [],
         'right_hand_landmarks': [],
-        'face_landmarks': []
+        'face_landmarks': {
+            
+        }
     }
-    for landmark in results.pose_world_landmarks.landmark:
-        landmarks_dict['pose_world_landmarks'].append({
-            'x': landmark.x,
-            'y': landmark.y,
-            'z': landmark.z,
-            'visibility': landmark.visibility,
-            'presence': landmark.presence
-        })
-    for landmark in results.pose_landmarks.landmark:
-        landmarks_dict['pose_landmarks'].append({
-            'x': landmark.x,
-            'y': landmark.y,
-            'z': landmark.z,
-            'visibility': landmark.visibility,
-            'presence': landmark.presence
-        })
+
+    face_landmarks_dict = {
+            'left_brow': [70, 105, 107],
+            'right_brow': [300, 334, 336],
+            'right_eye': [159, 133, 145, 33],
+            'left_eye': [386, 263, 374, 362],
+            'left_ball': [473],
+            'right_ball': [468],
+            'mouth': [0, 269, 409, 405, 17, 181, 62, 39]
+        }
+    if hasattr(results, 'pose_world_landmarks'):
+        if results.pose_world_landmarks is not None:
+            for landmark in results.pose_world_landmarks.landmark:
+                landmarks_dict['pose_world_landmarks'].append({
+                    'x': landmark.x,
+                    'y': landmark.y,
+                    'z': landmark.z,
+                    'visibility': landmark.visibility,
+                    'presence': landmark.presence
+                })
+    
     if hasattr(results, 'left_hand_landmarks'):
         if results.left_hand_landmarks is not None:
             for landmark in results.left_hand_landmarks.landmark:
@@ -50,15 +55,75 @@ def save_json(results):
                 })
     if hasattr(results, 'face_landmarks'):
         if results.face_landmarks is not None:
-            for landmark in results.face_landmarks.landmark:
-                landmarks_dict['face_landmarks'].append({
-                    'x': landmark.x,
-                    'y': landmark.y,
-                    'z': landmark.z,
+            left_brow = []
+            for index in face_landmarks_dict["left_brow"]:
+                value = results.face_landmarks.landmark[index]
+                left_brow.append({
+                    'x': value.x,
+                    'y': value.y,
+                    'z': value.z,
                 })
+            landmarks_dict['face_landmarks']['left_brow'] = left_brow
 
-    
+            right_brow = []
+            for index in face_landmarks_dict["right_brow"]:
+                value = results.face_landmarks.landmark[index]
+                right_brow.append({
+                    'x': value.x,
+                    'y': value.y,
+                    'z': value.z,
+                })
+            landmarks_dict['face_landmarks']['right_brow'] = right_brow
 
+            left_eye = []
+            for index in face_landmarks_dict["left_eye"]:
+                value = results.face_landmarks.landmark[index]
+                left_eye.append({
+                    'x': value.x,
+                    'y': value.y,
+                    'z': value.z,
+                })
+            landmarks_dict['face_landmarks']['left_eye'] = left_eye
+
+            right_eye = []
+            for index in face_landmarks_dict["right_eye"]:
+                value = results.face_landmarks.landmark[index]
+                right_eye.append({
+                    'x': value.x,
+                    'y': value.y,
+                    'z': value.z,
+                })
+            landmarks_dict['face_landmarks']['right_eye'] = right_eye
+
+            left_ball = []
+            for index in face_landmarks_dict["left_ball"]:
+                value = results.face_landmarks.landmark[index]
+                left_ball.append({
+                    'x': value.x,
+                    'y': value.y,
+                    'z': value.z,
+                })
+            landmarks_dict['face_landmarks']['left_ball'] = left_ball
+
+            right_ball = []
+            for index in face_landmarks_dict["right_ball"]:
+                value = results.face_landmarks.landmark[index]
+                right_ball.append({
+                    'x': value.x,
+                    'y': value.y,
+                    'z': value.z,
+                })
+            landmarks_dict['face_landmarks']['right_ball'] = right_ball
+
+            mouth = []
+            for index in face_landmarks_dict["mouth"]:  
+                value = results.face_landmarks.landmark[index]
+                mouth.append({
+                    'x': value.x,
+                    'y': value.y,
+                    'z': value.z,
+                })
+            landmarks_dict['face_landmarks']['mouth'] = mouth
     return landmarks_dict
 
 
@@ -74,12 +139,6 @@ def holistic_static(image):
         landmarks_dict = save_json(results)
         landmarks_dict["canvas_height"] = image_height
         landmarks_dict["canvas_width"] = image_width
-
-        annotated_image = image.copy()
-        condition = np.stack((results.segmentation_mask,) * 3, axis=-1) > 0.1
-        bg_image = np.zeros(image.shape, dtype=np.uint8)
-        bg_image[:] = BG_COLOR
-        annotated_image = np.where(condition, annotated_image, bg_image)
         annotated_image = np.zeros(shape=(image_height, image_width, 3), dtype=np.uint8)
 
         mp_drawing.draw_landmarks(
