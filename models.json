@@ -4,5 +4,11 @@
             "repo_id": "Pictorial/mediapipe",
             "local_path": "venv/lib/{PY_VERSION}/site-packages/mediapipe"
         }
+    ],
+    "mps": [
+        {
+            "repo_id": "Pictorial/mediapipe",
+            "local_path": ".venv/lib/{PY_VERSION}/site-packages/mediapipe"
+        }
     ]
 }
